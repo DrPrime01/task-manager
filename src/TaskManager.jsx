@@ -1,5 +1,6 @@
 /* eslint-disable no-mixed-spaces-and-tabs */
 import { useState, useEffect, useReducer } from "react";
+import { collection, getDocs } from "@firebase/firestore";
 import { useForm } from "react-hook-form";
 import AddIcon from "@mui/icons-material/Add";
 
@@ -7,6 +8,7 @@ import Navbar from "./components/Navbar";
 import TaskApp from "./TaskApp";
 import TaskModal from "./TaskModal";
 import { setStatus } from "./utils";
+import { firestore } from "./firebaseSetup/firebase";
 
 export default function TaskManager() {
 	const [checked, setChecked] = useState(false);
@@ -20,6 +22,17 @@ export default function TaskManager() {
 		setChecked(prefersDark);
 	}, [prefersDark]);
 
+	async function getTasks(db) {
+		const tasksCol = collection(db, "tasks");
+		const taskSnapshot = await getDocs(tasksCol);
+		const taskList = taskSnapshot.docs.map((doc) => doc.data());
+		console.log(taskList);
+		return taskList;
+	}
+
+	useEffect(() => {
+		getTasks(firestore);
+	}, []);
 	const methods = useForm({
 		mode: "all",
 		defaultValues: {
