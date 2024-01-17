@@ -19,9 +19,9 @@ export default function EachTask({
 	const isDeadlinePassed = moment(new Date()) > moment(deadline.toDate());
 	return (
 		<div
-			className={`border rounded-[10px] py-2 px-4 flex justify-between h-[160px] w-full ${
+			className={`border rounded-[10px] py-2 px-4 transition duration-300 flex justify-between h-[160px] w-full ${
 				completed ? "bg-opacity-50" : ""
-			}`}
+			} ${!darkmode && "bg-[#ddd]"}`}
 		>
 			<div className="flex flex-col justify-between">
 				<div>

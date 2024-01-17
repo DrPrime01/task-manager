@@ -180,9 +180,9 @@ export default function TaskManager() {
 					handleDelete={deleteTask}
 					markAsCompleted={toggleCompleted}
 				/>
-				<div className="absolute right-0 bottom-10">
+				<div className="absolute right-4 md:right-0 bottom-16 md:bottom-10">
 					<button
-						className={`transition duration-300 bg-opacity-30 hover:bg-opacity-100 rounded-full shadow-lg h-10 w-10 bg-slate-900 ${
+						className={`transition duration-300 md:bg-opacity-30 hover:bg-opacity-100 rounded-full shadow-lg h-10 w-10 bg-slate-900 ${
 							checked ? "bg-[#ddd]" : ""
 						}`}
 						onClick={() => setOpenTaskModal(true)}
