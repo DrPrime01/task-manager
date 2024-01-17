@@ -10,13 +10,13 @@ export default function EachTask({
 	taskName,
 	desc,
 	deadline,
-	status,
 	handleDelete,
 	handleEdit,
 	darkmode,
 	completed,
 	markAsCompleted,
 }) {
+	const isDeadlinePassed = moment(new Date()) > moment(deadline.toDate());
 	return (
 		<div
 			className={`border rounded-[10px] py-2 px-4 flex justify-between h-[160px] w-full ${
@@ -43,22 +43,18 @@ export default function EachTask({
 				<span
 					className={`font-medium transition duration-300 text-[#444444] ${
 						darkmode ? "text-slate-200" : ""
-					}`}
+					} ${isDeadlinePassed ? "!text-red-500" : ""}`}
 				>
-					{moment(deadline).format("DD/MM/YY, h:mm A")}
+					{moment(deadline.toDate()).format("DD/MM/YY, h:mm A")}
 				</span>
 			</div>
 			<div className="flex flex-col justify-between text-end">
 				<span
 					className={`font-medium ${
-						status?.toLowerCase() === "ongoing"
-							? "text-blue-500"
-							: status?.toLowerCase() === "completed"
-							? "text-green-500"
-							: "text-red-500"
+						completed ? "text-green-500" : "text-blue-500"
 					}`}
 				>
-					{status || "Ongoing"}
+					{completed ? "Completed" : "Ongoing"}
 				</span>
 				<div className="flex items-center gap-x-1">
 					<IconButton onClick={() => markAsCompleted(id)}>

@@ -18,7 +18,6 @@ export default function TaskApp({
 					desc={task?.desc}
 					deadline={task?.deadline}
 					completed={task?.completed}
-					status={task?.status}
 					handleDelete={handleDelete}
 					handleEdit={handleEdit}
 					darkmode={darkmode}

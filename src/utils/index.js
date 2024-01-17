@@ -1,11 +1,6 @@
-export const setStatus = (deadline, completed = false) => {
-	const currentTime = new Date();
-
-	if (completed) {
-		return "Completed";
-	} else if (currentTime <= deadline) {
-		return "Ongoing";
-	} else if (currentTime > deadline) {
-		return "Overdue";
-	}
-};
+export function removeUnwanted(unwanted, data) {
+	if (Array.isArray(unwanted)) {
+		unwanted.forEach((unwantedField) => delete data[unwantedField]);
+	} else delete data[unwanted];
+	return data;
+}

@@ -1,13 +1,25 @@
 /* eslint-disable no-mixed-spaces-and-tabs */
 import { useState, useEffect, useReducer } from "react";
-import { collection, getDocs } from "@firebase/firestore";
+import {
+	collection,
+	onSnapshot,
+	addDoc,
+	getDoc,
+	Timestamp,
+	doc,
+	deleteDoc,
+	updateDoc,
+	query,
+	serverTimestamp,
+	orderBy,
+} from "@firebase/firestore";
 import { useForm } from "react-hook-form";
 import AddIcon from "@mui/icons-material/Add";
 
 import Navbar from "./components/Navbar";
 import TaskApp from "./TaskApp";
 import TaskModal from "./TaskModal";
-import { setStatus } from "./utils";
+import { removeUnwanted } from "./utils";
 import { firestore } from "./firebaseSetup/firebase";
 
 export default function TaskManager() {
@@ -22,17 +34,49 @@ export default function TaskManager() {
 		setChecked(prefersDark);
 	}, [prefersDark]);
 
-	async function getTasks(db) {
-		const tasksCol = collection(db, "tasks");
-		const taskSnapshot = await getDocs(tasksCol);
-		const taskList = taskSnapshot.docs.map((doc) => doc.data());
-		console.log(taskList);
-		return taskList;
+	const tasksColRef = collection(firestore, "tasks");
+	const q = query(tasksColRef, orderBy("createdAt", "desc"));
+
+	function getTasks(dispatch) {
+		return onSnapshot(q, (snapshot) => {
+			const taskList = snapshot.docs.map((doc) => ({
+				id: doc.id,
+				...doc.data(),
+			}));
+			console.log(taskList);
+
+			dispatch({ type: "ADDTASKSFROMDB", payload: { data: taskList } });
+		});
 	}
 
+	const initialState = [];
+
 	useEffect(() => {
-		getTasks(firestore);
+		const fetchData = async () => {
+			try {
+				const unsubscribe = getTasks(dispatch);
+				return () => unsubscribe();
+			} catch (err) {
+				console.log(err);
+			}
+		};
+
+		fetchData();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
+
+	const [tasks, dispatch] = useReducer(reducer, initialState);
+
+	function reducer(state, action) {
+		switch (action.type) {
+			case "ADDTASKSFROMDB": {
+				return action.payload.data;
+			}
+			default:
+				return state;
+		}
+	}
+
 	const methods = useForm({
 		mode: "all",
 		defaultValues: {
@@ -43,91 +87,31 @@ export default function TaskManager() {
 		},
 	});
 
-	const defaultTasks = [
-		{
-			id: 1,
-			taskName: "Task One",
-			desc: "The beginning of tasks",
-			deadline: new Date(),
-			status: "Ongoing",
-			completed: false,
-		},
-	];
+	const toggleCompleted = async (id) => {
+		const docRef = doc(firestore, "tasks", id);
 
-	const [tasks, dispatch] = useReducer(reducer, defaultTasks);
+		try {
+			const res = await getDoc(docRef);
 
-	function reducer(state, action) {
-		switch (action.type) {
-			case "TOGGLE": {
-				return state.map((task) => {
-					const dateTime = { ...task?.date, ...task?.time };
-					return task.id === action.payload.id
-						? {
-								...task,
-								completed: !task?.completed,
-								status: setStatus(dateTime?.$d, task.completed),
-						  }
-						: task;
+			if (res.exists()) {
+				const resData = res.data();
+				const updatedCompleted = !resData.completed;
+
+				await updateDoc(docRef, {
+					completed: updatedCompleted,
 				});
+			} else {
+				console.log("Document does not exist");
 			}
-			case "DELETE": {
-				return state.filter((task) => task?.id !== action.payload.id);
-			}
-			case "UPDATE": {
-				return state.map((prevTask) =>
-					prevTask?.id === action.payload.id
-						? {
-								id: editedTaskId,
-								deadline: action.payload.dateTime?.$d,
-								completed: false,
-								status: setStatus(action.payload.dateTime?.$d),
-								...action.payload.data,
-						  }
-						: prevTask
-				);
-			}
-			case "ADD": {
-				return [
-					...state,
-					{
-						id: state?.length + 1,
-						deadline: action.payload.dateTime?.$d,
-						completed: false,
-						status: setStatus(action.payload.dateTime?.$d),
-						...action.payload.data,
-					},
-				];
-			}
-			case "UPDATETASKSTATUS":
-				{
-					const updatedTask = state.find(
-						(task) => task.id === action.payload.id
-					);
-					if (updatedTask) {
-						return state.map((task) => {
-							const dateTime = { ...task?.date, ...task?.time };
-							return task.id === action.payload.id
-								? {
-										...task,
-										status: setStatus(dateTime?.$d, updatedTask?.completed),
-								  }
-								: task;
-						});
-					}
-				}
-				break;
-			default:
-				return state;
+		} catch (error) {
+			console.error("Error toggling completed:", error);
 		}
-	}
-
-	useEffect(() => {}, []);
-
-	const toggleCompleted = (id) => {
-		dispatch({ type: "TOGGLE", payload: { id } });
-		dispatch({ type: "UPDATETASKSTATUS", payload: { id } });
 	};
-	const deleteTask = (id) => dispatch({ type: "DELETE", payload: { id } });
+
+	const deleteTask = async (id) => {
+		const docRef = doc(firestore, "tasks", id);
+		await deleteDoc(docRef);
+	};
 
 	const editTask = (id) => {
 		setIsEditing(true);
@@ -152,22 +136,23 @@ export default function TaskManager() {
 	const onSubmitTask = async (data) => {
 		setIsSubmitSuccessful(false);
 		const dateTime = { ...data?.date, ...data?.time };
+		const dateObject = new Date(dateTime?.$d);
+		const timestamp = Timestamp.fromDate(dateObject);
+		const originalObject = {
+			deadline: timestamp,
+			completed: false,
+			createdAt: serverTimestamp(),
+			...data,
+		};
+		const originalData = removeUnwanted(["date", "time"], originalObject);
 		if (isEditing && editedTaskId) {
-			await dispatch({
-				type: "UPDATE",
-				payload: { id: editedTaskId, dateTime, data },
-			});
+			const docRef = doc(firestore, "tasks", editedTaskId);
+			updateDoc(docRef, { ...originalData });
 			setIsEditing(false);
 			setIsSubmitSuccessful(true);
 			setOpenTaskModal(false);
 		} else {
-			await dispatch({
-				type: "ADD",
-				payload: {
-					dateTime,
-					data,
-				},
-			});
+			await addDoc(tasksColRef, originalData);
 			setIsSubmitSuccessful(true);
 			setOpenTaskModal(false);
 		}
@@ -198,7 +183,7 @@ export default function TaskManager() {
 				<div className="absolute right-0 bottom-10">
 					<button
 						className={`transition duration-300 bg-opacity-30 hover:bg-opacity-100 rounded-full shadow-lg h-10 w-10 bg-slate-900 ${
-							checked ? "bg-[#94a3b8]" : ""
+							checked ? "bg-[#ddd]" : ""
 						}`}
 						onClick={() => setOpenTaskModal(true)}
 					>
@@ -226,3 +211,14 @@ export default function TaskManager() {
 		</div>
 	);
 }
+
+// const defaultTasks = [
+// 	{
+// 		id: 1,
+// 		taskName: "Task One",
+// 		desc: "The beginning of tasks",
+// 		deadline: new Date(),
+// 		status: "Ongoing",
+// 		completed: false,
+// 	},
+// ];
