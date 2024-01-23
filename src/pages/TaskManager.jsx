@@ -15,12 +15,14 @@ import {
 	orderBy,
 } from "@firebase/firestore";
 import { useForm } from "react-hook-form";
+import moment from "moment";
 import AddIcon from "@mui/icons-material/Add";
 
 import TaskApp from "./TaskApp";
 import TaskModal from "./TaskModal";
 import { removeUnwanted } from "../utils";
 import { DarkmodeContext } from "../context/Darkmode";
+import { AuthContext } from "./../context/Auth";
 import { firestore } from "../firebaseSetup/firebase";
 
 export default function TaskManager() {
@@ -29,8 +31,11 @@ export default function TaskManager() {
 	const [editedTaskId, setEditedTaskId] = useState("");
 	const [isSubmitSuccessful, setIsSubmitSuccessful] = useState(false);
 	const { checked } = useContext(DarkmodeContext);
+	const { userId } = useContext(AuthContext);
 
-	const tasksColRef = collection(firestore, "users");
+	// const usersColRef = collection(firestore, "users");
+	const usersDocRef = doc(firestore, "users", userId);
+	const tasksColRef = collection(usersDocRef, "tasks");
 	const q = query(tasksColRef, orderBy("createdAt", "desc"));
 
 	function getTasks(dispatch) {
@@ -39,7 +44,7 @@ export default function TaskManager() {
 				id: doc.id,
 				...doc.data(),
 			}));
-			console.log(taskList);
+			// console.log(taskList);
 
 			dispatch({ type: "ADDTASKSFROMDB", payload: { data: taskList } });
 		});
@@ -84,7 +89,9 @@ export default function TaskManager() {
 	});
 
 	const toggleCompleted = async (id) => {
-		const docRef = doc(firestore, "users", id);
+		const usersDocRef = doc(firestore, "users", userId);
+		const tasksColRef = collection(usersDocRef, "tasks");
+		const docRef = doc(tasksColRef, id);
 
 		try {
 			const res = await getDoc(docRef);
@@ -105,7 +112,9 @@ export default function TaskManager() {
 	};
 
 	const deleteTask = async (id) => {
-		const docRef = doc(firestore, "users", id);
+		const usersDocRef = doc(firestore, "users", userId);
+		const tasksColRef = collection(usersDocRef, "tasks");
+		const docRef = doc(tasksColRef, id);
 		await deleteDoc(docRef);
 	};
 
@@ -117,7 +126,7 @@ export default function TaskManager() {
 
 	useEffect(() => {
 		const editedData = tasks?.find((task) => task?.id === editedTaskId);
-		console.log(editedData);
+		// console.log(editedData);
 		if (editedData) {
 			methods.reset({
 				taskName: editedData?.taskName || "",
@@ -131,9 +140,13 @@ export default function TaskManager() {
 
 	const onSubmitTask = async (data) => {
 		setIsSubmitSuccessful(false);
-		const dateTime = { ...data?.date, ...data?.time };
-		const dateObject = new Date(dateTime?.$d);
-		const timestamp = Timestamp.fromDate(dateObject);
+		const inputDate = moment(
+			`${data?.date?.$D}/${data?.date?.$M + 1}/${data?.date?.$y}, ${
+				data?.time?.$H
+			}:${data?.time?.$m}`,
+			"DD/MM/YYYY, HH:mm"
+		);
+		const timestamp = Timestamp.fromDate(inputDate?._d);
 		const originalObject = {
 			deadline: timestamp,
 			completed: false,
@@ -142,7 +155,9 @@ export default function TaskManager() {
 		};
 		const originalData = removeUnwanted(["date", "time"], originalObject);
 		if (isEditing && editedTaskId) {
-			const docRef = doc(firestore, "users", editedTaskId);
+			const usersDocRef = doc(firestore, "users", userId);
+			const tasksColRef = collection(usersDocRef, "tasks");
+			const docRef = doc(tasksColRef, editedTaskId);
 			updateDoc(docRef, { ...originalData });
 			setIsEditing(false);
 			setIsSubmitSuccessful(true);

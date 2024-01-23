@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useForm, FormProvider } from "react-hook-form";
 import Button from "@mui/material/Button";
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import { doc, setDoc, collection } from "firebase/firestore";
+import { doc, collection } from "firebase/firestore";
 
 import { auth, firestore } from "../firebaseSetup/firebase";
 import ValidatedInput from "../components/Forms/ValidatedInput";
@@ -24,8 +24,7 @@ export default function Signup() {
 			setToken(res?.user?.accessToken);
 			setUserId(res?.user?.uid);
 			const userColRef = collection(firestore, "users");
-			const userRef = doc(userColRef, res?.user?.uid);
-			await setDoc(userRef, {});
+			doc(userColRef, res?.user?.uid);
 			setIsLoggedIn(true);
 			navigate("/");
 		} catch (err) {
