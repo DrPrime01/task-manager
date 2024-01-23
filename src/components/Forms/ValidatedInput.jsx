@@ -7,6 +7,8 @@ export default function ValidatedInput({
 	label,
 	required,
 	errMsg,
+	type,
+	rules,
 	showErrMsg = true,
 }) {
 	const {
@@ -23,7 +25,9 @@ export default function ValidatedInput({
 				variant="outlined"
 				{...register(name, {
 					required: required ? "This field is required" : false,
+					...rules,
 				})}
+				type={type || "text"}
 				error={Boolean(showErrMsg && error)}
 				helperText={showErrMsg && error ? error.message || errMsg : ""}
 			/>

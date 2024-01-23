@@ -2,12 +2,12 @@
 import { useForm, FormProvider } from "react-hook-form";
 import Button from "@mui/material/Button";
 
-import Modal from "./components/Modals";
-import ValidatedInput from "./components/Forms/ValidatedInput";
-import ValidatedTextArea from "./components/Forms/ValidatedTextArea";
+import Modal from "../components/Modals";
+import ValidatedInput from "../components/Forms/ValidatedInput";
+import ValidatedTextArea from "../components/Forms/ValidatedTextArea";
 import TimePickerField, {
 	DatePickerField,
-} from "./components/Forms/DateTimePicker";
+} from "../components/Forms/DateTimePicker";
 
 export default function TaskModal({
 	openModal,

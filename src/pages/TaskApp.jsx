@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import EachTask from "./components/EachTask";
+import EachTask from "../components/EachTask";
 
 export default function TaskApp({
 	tasks,

@@ -1,5 +1,6 @@
+/* eslint-disable react/prop-types */
 /* eslint-disable no-mixed-spaces-and-tabs */
-import { useState, useEffect, useReducer } from "react";
+import { useState, useEffect, useReducer, useContext } from "react";
 import {
 	collection,
 	onSnapshot,
@@ -16,25 +17,20 @@ import {
 import { useForm } from "react-hook-form";
 import AddIcon from "@mui/icons-material/Add";
 
-import Navbar from "./components/Navbar";
 import TaskApp from "./TaskApp";
 import TaskModal from "./TaskModal";
-import { removeUnwanted } from "./utils";
-import { firestore } from "./firebaseSetup/firebase";
+import { removeUnwanted } from "../utils";
+import { DarkmodeContext } from "../context/Darkmode";
+import { firestore } from "../firebaseSetup/firebase";
 
 export default function TaskManager() {
-	const [checked, setChecked] = useState(false);
 	const [openTaskModal, setOpenTaskModal] = useState(false);
 	const [isEditing, setIsEditing] = useState(false);
 	const [editedTaskId, setEditedTaskId] = useState("");
 	const [isSubmitSuccessful, setIsSubmitSuccessful] = useState(false);
+	const { checked } = useContext(DarkmodeContext);
 
-	const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-	useEffect(() => {
-		setChecked(prefersDark);
-	}, [prefersDark]);
-
-	const tasksColRef = collection(firestore, "tasks");
+	const tasksColRef = collection(firestore, "users");
 	const q = query(tasksColRef, orderBy("createdAt", "desc"));
 
 	function getTasks(dispatch) {
@@ -88,7 +84,7 @@ export default function TaskManager() {
 	});
 
 	const toggleCompleted = async (id) => {
-		const docRef = doc(firestore, "tasks", id);
+		const docRef = doc(firestore, "users", id);
 
 		try {
 			const res = await getDoc(docRef);
@@ -109,7 +105,7 @@ export default function TaskManager() {
 	};
 
 	const deleteTask = async (id) => {
-		const docRef = doc(firestore, "tasks", id);
+		const docRef = doc(firestore, "users", id);
 		await deleteDoc(docRef);
 	};
 
@@ -146,7 +142,7 @@ export default function TaskManager() {
 		};
 		const originalData = removeUnwanted(["date", "time"], originalObject);
 		if (isEditing && editedTaskId) {
-			const docRef = doc(firestore, "tasks", editedTaskId);
+			const docRef = doc(firestore, "users", editedTaskId);
 			updateDoc(docRef, { ...originalData });
 			setIsEditing(false);
 			setIsSubmitSuccessful(true);
@@ -164,39 +160,34 @@ export default function TaskManager() {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [isSubmitSuccessful]);
 	return (
-		<div
-			className={`min-h-screen transition duration-300 ${
-				checked ? "bg-slate-900" : ""
-			}`}
-		>
-			<div
-				className={`min-h-screen max-w-screen-md mx-auto px-6 flex flex-col gap-y-8 relative`}
-			>
-				<Navbar checked={checked} setChecked={setChecked} darkmode={checked} />
-				<TaskApp
-					tasks={tasks}
-					darkmode={checked}
-					handleEdit={editTask}
-					handleDelete={deleteTask}
-					markAsCompleted={toggleCompleted}
-				/>
-				<div className="absolute right-4 md:right-0 bottom-16 md:bottom-10">
-					<button
-						className={`transition duration-300 md:bg-opacity-30 hover:bg-opacity-100 rounded-full shadow-lg h-10 w-10 bg-slate-900 ${
-							checked ? "bg-[#ddd]" : ""
-						}`}
-						onClick={() => setOpenTaskModal(true)}
-					>
-						<AddIcon
-							sx={{
-								color: checked ? "#0f172a" : "#94a3b8",
-								transition: "color",
-								transitionDuration: 300,
-							}}
-						/>
-					</button>
-				</div>
+		<div className="relative min-h-[85vh]">
+			<TaskApp
+				tasks={tasks}
+				darkmode={checked}
+				handleEdit={editTask}
+				handleDelete={deleteTask}
+				markAsCompleted={toggleCompleted}
+			/>
+			<div className="absolute right-4 md:right-0 bottom-16 md:bottom-10">
+				<button
+					className={`transition duration-300 md:bg-opacity-30 hover:bg-opacity-100 rounded-full shadow-lg h-10 w-10 ${
+						checked ? "bg-[#ddd]" : "bg-slate-900"
+					}`}
+					onClick={() => setOpenTaskModal(true)}
+				>
+					<AddIcon
+						sx={{
+							color: checked ? "#94a3b8" : "#0f172a",
+							transition: "color",
+							transitionDuration: 300,
+							"&:hover": {
+								color: "#94a3b8",
+							},
+						}}
+					/>
+				</button>
 			</div>
+
 			<TaskModal
 				openModal={openTaskModal}
 				closeModal={() => {
