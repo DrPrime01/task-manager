@@ -4,6 +4,7 @@ import { useForm, FormProvider } from "react-hook-form";
 import Button from "@mui/material/Button";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, collection } from "firebase/firestore";
+import { toast } from "react-toastify";
 
 import { auth, firestore } from "../firebaseSetup/firebase";
 import ValidatedInput from "../components/Forms/ValidatedInput";
@@ -26,9 +27,11 @@ export default function Signup() {
 			const userColRef = collection(firestore, "users");
 			doc(userColRef, res?.user?.uid);
 			setIsLoggedIn(true);
+			toast("Signup successful!");
 			navigate("/");
 		} catch (err) {
 			console.log(err);
+			toast.error(err);
 		}
 	};
 	return (

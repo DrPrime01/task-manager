@@ -17,6 +17,7 @@ import {
 import { useForm } from "react-hook-form";
 import moment from "moment";
 import AddIcon from "@mui/icons-material/Add";
+import { toast } from "react-toastify";
 
 import TaskApp from "./TaskApp";
 import TaskModal from "./TaskModal";
@@ -103,11 +104,14 @@ export default function TaskManager() {
 				await updateDoc(docRef, {
 					completed: updatedCompleted,
 				});
+
+				if (updatedCompleted) toast("Task completed!");
+				else toast("Task status updated!");
 			} else {
-				console.log("Document does not exist");
+				toast.error("Document does not exist");
 			}
 		} catch (error) {
-			console.error("Error toggling completed:", error);
+			toast.error("Error toggling completed");
 		}
 	};
 
@@ -115,7 +119,12 @@ export default function TaskManager() {
 		const usersDocRef = doc(firestore, "users", userId);
 		const tasksColRef = collection(usersDocRef, "tasks");
 		const docRef = doc(tasksColRef, id);
-		await deleteDoc(docRef);
+		try {
+			await deleteDoc(docRef);
+			toast("Task deleted!");
+		} catch (err) {
+			toast.error("Errow while deleting task");
+		}
 	};
 
 	const editTask = (id) => {
@@ -154,18 +163,24 @@ export default function TaskManager() {
 			...data,
 		};
 		const originalData = removeUnwanted(["date", "time"], originalObject);
-		if (isEditing && editedTaskId) {
-			const usersDocRef = doc(firestore, "users", userId);
-			const tasksColRef = collection(usersDocRef, "tasks");
-			const docRef = doc(tasksColRef, editedTaskId);
-			updateDoc(docRef, { ...originalData });
-			setIsEditing(false);
-			setIsSubmitSuccessful(true);
-			setOpenTaskModal(false);
-		} else {
-			await addDoc(tasksColRef, originalData);
-			setIsSubmitSuccessful(true);
-			setOpenTaskModal(false);
+		try {
+			if (isEditing && editedTaskId) {
+				const usersDocRef = doc(firestore, "users", userId);
+				const tasksColRef = collection(usersDocRef, "tasks");
+				const docRef = doc(tasksColRef, editedTaskId);
+				updateDoc(docRef, { ...originalData });
+				setIsEditing(false);
+				setIsSubmitSuccessful(true);
+				toast("Task updated succesfully!");
+				setOpenTaskModal(false);
+			} else {
+				await addDoc(tasksColRef, originalData);
+				setIsSubmitSuccessful(true);
+				toast("Task added successfully!");
+				setOpenTaskModal(false);
+			}
+		} catch (err) {
+			toast.error("Error while updating/adding task");
 		}
 	};
 

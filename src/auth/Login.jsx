@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useForm, FormProvider } from "react-hook-form";
 import Button from "@mui/material/Button";
 import { signInWithEmailAndPassword } from "firebase/auth";
+import { toast } from "react-toastify";
 
 import { auth } from "../firebaseSetup/firebase";
 import ValidatedInput from "../components/Forms/ValidatedInput";
@@ -19,10 +20,10 @@ export default function Login() {
 				data?.email,
 				data?.password
 			);
-			console.log(res);
 			setToken(res?.user?.accessToken);
 			setUserId(res?.user?.uid);
 			setIsLoggedIn(true);
+			toast("Login successful!");
 			navigate("/");
 		} catch (err) {
 			console.log(err);
