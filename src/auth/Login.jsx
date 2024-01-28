@@ -26,7 +26,9 @@ export default function Login() {
 			toast("Login successful!");
 			navigate("/");
 		} catch (err) {
-			console.log(err);
+			if (err.code === "auth/invalid-credential") {
+				toast.error("Invalid Credentials!");
+			}
 		}
 	};
 	return (

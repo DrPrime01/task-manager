@@ -22,7 +22,7 @@ export default function Modal({
 				<Slide direction="up" in={openModal} mountOnEnter unmountOnExit>
 					<div
 						style={{ maxWidth }}
-						className="relative min-h-[548px] max-h-[85vh] overflow-y-auto flex flex-col min-w-[697px] w-[95vw] m-auto md:pt-16 md:px-24 p-4 sm:p-5 rounded-[10px] bg-white"
+						className="relative min-h-[548px] max-h-[85vh] overflow-y-auto flex flex-col md:min-w-[697px] w-[95vw] m-auto md:pt-16 md:px-24 p-4 sm:p-5 rounded-[10px] bg-white"
 					>
 						<div>
 							<p className="text-black text-xl font-semibold mb-10">{title}</p>
