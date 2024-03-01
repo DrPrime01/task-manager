@@ -1,5 +1,5 @@
-const staticCacheName = "site-static-v9";
-const dynamicCacheName = "site-dynamic-v9";
+const staticCacheName = "site-static-v12";
+const dynamicCacheName = "site-dynamic-v10";
 const assets = [
 	"/",
 	"/index.html",
@@ -61,4 +61,16 @@ self.addEventListener("fetch", (e) => {
 			})
 		);
 	}
+});
+
+self.addEventListener("push", (event) => {
+	const data = event.data.json();
+	console.log("push", event);
+	event.waitUntil(
+		self.registration.showNotification(data.title, {
+			body: data.body,
+			icon: "/images/mask-icon.svg",
+			// other options
+		})
+	);
 });

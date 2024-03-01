@@ -24,17 +24,30 @@ import TaskModal from "./TaskModal";
 import { removeUnwanted } from "../utils";
 import { DarkmodeContext } from "../context/Darkmode";
 import { AuthContext } from "./../context/Auth";
-import { firestore } from "../firebaseSetup/firebase";
+import {
+	firestore,
+	getTokenForPushNotifications,
+} from "../firebaseSetup/firebase";
 
 export default function TaskManager() {
 	const [openTaskModal, setOpenTaskModal] = useState(false);
 	const [isEditing, setIsEditing] = useState(false);
+	const [deviceToken, setDeviceToken] = useState(null);
 	const [editedTaskId, setEditedTaskId] = useState("");
 	const [isSubmitSuccessful, setIsSubmitSuccessful] = useState(false);
 	const { checked } = useContext(DarkmodeContext);
 	const { userId } = useContext(AuthContext);
 
-	// const usersColRef = collection(firestore, "users");
+	useEffect(() => {
+		async function getToken() {
+			const token = await getTokenForPushNotifications();
+			setDeviceToken(token);
+			return;
+		}
+
+		getToken();
+	}, []);
+	console.log(deviceToken);
 	const usersDocRef = doc(firestore, "users", userId);
 	const tasksColRef = collection(usersDocRef, "tasks");
 	const q = query(tasksColRef, orderBy("createdAt", "desc"));

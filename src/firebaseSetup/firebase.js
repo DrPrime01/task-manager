@@ -1,6 +1,7 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
+import { getMessaging, getToken } from "firebase/messaging";
 import {
 	getFirestore,
 	persistentSingleTabManager,
@@ -31,6 +32,19 @@ initializeFirestore(app, {
 		/*settings*/ { tabManager: persistentSingleTabManager() }
 	),
 });
+const messaging = getMessaging(app);
+export async function getTokenForPushNotifications() {
+	try {
+		const token = await getToken(messaging, {
+			vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
+		});
+		console.log("Firebase Token for Push Notifications:", token);
+		return token;
+	} catch (error) {
+		console.error("Error getting token for push notifications:", error);
+		return null;
+	}
+}
 export const analytics = getAnalytics(app);
 export const firestore = getFirestore(app);
 export const auth = getAuth(app);
