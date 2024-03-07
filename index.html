@@ -34,7 +34,7 @@
 						deviceId
 					)
 				)
-				.then(() => beamsClient.addDeviceInterest("hello"))
+				.then(() => beamsClient.addDeviceInterest("debug-hello"))
 				.then(() => beamsClient.getDeviceInterests())
 				.then((interests) => console.log("Current interests:", interests))
 				.catch(console.error);
