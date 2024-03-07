@@ -14,13 +14,13 @@
 		/>
 		<link rel="mask-icon" href="/images/mask-icon.svg" color="#FFFFFF" />
 		<meta name="theme-color" content="#0f172a" />
-		<script src="https://js.pusher.com/beams/1.0/push-notifications-cdn.js"></script>
+		<!-- <script src="https://js.pusher.com/beams/1.0/push-notifications-cdn.js"></script> -->
 	</head>
 	<body>
 		<div id="root"></div>
 		<script type="module" src="/src/main.jsx"></script>
 		<script type="module" src="/push.js"></script>
-		<script>
+		<!-- <script>
 			const beamsClient = new PusherPushNotifications.Client({
 				instanceId: "08481db0-f3d7-4f91-a1c6-547956916586",
 			});
@@ -30,6 +30,6 @@
 				.then(() => beamsClient.addDeviceInterest("hello"))
 				.then(() => console.log("Successfully registered and subscribed!"))
 				.catch(console.error);
-		</script>
+		</script> -->
 	</body>
 </html>
