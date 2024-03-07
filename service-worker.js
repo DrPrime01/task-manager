@@ -1,3 +1,6 @@
+// eslint-disable-next-line no-undef
+importScripts("https://js.pusher.com/beams/service-worker.js");
+
 const staticCacheName = "site-static-v12";
 const dynamicCacheName = "site-dynamic-v10";
 const assets = [
@@ -63,14 +66,14 @@ self.addEventListener("fetch", (e) => {
 	}
 });
 
-self.addEventListener("push", (event) => {
-	const data = event.data.json();
-	console.log("push", event);
-	event.waitUntil(
-		self.registration.showNotification(data.title, {
-			body: data.body,
-			icon: "/images/mask-icon.svg",
-			// other options
-		})
-	);
-});
+// self.addEventListener("push", (event) => {
+// 	const data = event.data.json();
+// 	console.log("push", event);
+// 	event.waitUntil(
+// 		self.registration.showNotification(data.title, {
+// 			body: data.body,
+// 			icon: "/images/mask-icon.svg",
+// 			// other options
+// 		})
+// 	);
+// });

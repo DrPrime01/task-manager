@@ -4,6 +4,7 @@ import { useForm, FormProvider } from "react-hook-form";
 import Button from "@mui/material/Button";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { toast } from "react-toastify";
+import axios from "axios";
 
 import { auth } from "../firebaseSetup/firebase";
 import ValidatedInput from "../components/Forms/ValidatedInput";
@@ -13,6 +14,34 @@ export default function Login() {
 	const { setToken, setUserId, setIsLoggedIn } = useContext(AuthContext);
 	const navigate = useNavigate();
 	const methods = useForm({ mode: "all" });
+
+	const sendPushNotification = async () => {
+		try {
+			await axios.post(
+				"https://08481db0-f3d7-4f91-a1c6-547956916586.pushnotifications.pusher.com/publish_api/v1/instances/08481db0-f3d7-4f91-a1c6-547956916586/publishes",
+				{
+					interests: ["hello"],
+					web: {
+						notification: {
+							title: "Hello",
+							body: "Hello, world!",
+						},
+					},
+				},
+				{
+					headers: {
+						"Content-Type": "application/json",
+						Authorization:
+							"Bearer F393829C6BC73556AC286FA2E3EC7B8B3BBAA589B1CF067B67DEBB92C51A07FF",
+					},
+				}
+			);
+			console.log("Push notification sent successfully");
+		} catch (error) {
+			console.error("Error sending push notification:", error);
+		}
+	};
+
 	const onSubmit = async (data) => {
 		try {
 			const res = await signInWithEmailAndPassword(
@@ -24,6 +53,8 @@ export default function Login() {
 			setUserId(res?.user?.uid);
 			setIsLoggedIn(true);
 			toast("Login successful!");
+			console.log(res);
+			await sendPushNotification();
 			navigate("/");
 		} catch (err) {
 			if (err.code === "auth/invalid-credential") {
