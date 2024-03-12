@@ -3,6 +3,7 @@
     "short_name": "TaskManager",
     "description": "An app for managing your tasks.",
     "start_url": "/",
+    "scope": "/",
     "display": "standalone",
     "background_color": "#475569",
     "theme_color": "#0f172a",
