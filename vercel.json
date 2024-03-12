@@ -2,14 +2,12 @@
     "rewrites": [
         {
             "source": "/(.*)",
-            "destination": "/"
-        }
-    ],
-    "routes": [
-        {
-            "src": "./service-worker.js",
+            "destination": "/",
             "headers": {
-                "Content-Type": "application/javascript"
+                "source": "./service-worker.js",
+                "headers": {
+                    "Content-Type": "application/javascript"
+                }
             }
         }
     ]
