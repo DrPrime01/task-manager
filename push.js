@@ -8,7 +8,7 @@ if ("serviceWorker" in navigator) {
 				console.log("SW registered");
 				// return navigator.serviceWorker.ready;
 			})
-			.catch(() => console.log("SW not registered. Error!"));
+			.catch((err) => console.log("SW not registered. Error", err));
 	});
 }
 
