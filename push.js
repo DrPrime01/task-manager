@@ -3,7 +3,7 @@
 if ("serviceWorker" in navigator) {
 	window.addEventListener("load", () => {
 		navigator.serviceWorker
-			.register("/sw.js", { scope: "/" })
+			.register("./service-worker.js", { scope: "/" })
 			.then(() => {
 				console.log("SW registered");
 				// return navigator.serviceWorker.ready;
