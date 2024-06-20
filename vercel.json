@@ -1,11 +1,15 @@
 {
+    "version": 2,
+    "builds": [
+        {
+            "src": "package.json",
+            "use": "@vercel/static-build"
+        }
+    ],
     "routes": [
         {
-            "src": "/(.*\\.(js|html|css|svg|png))$",
-            "headers": {
-                "Content-Type": "application/javascript"
-            },
-            "continue": true
+            "src": "/(.*)",
+            "dest": "/index.html"
         }
     ]
 }
